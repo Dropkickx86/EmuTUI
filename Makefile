@@ -21,7 +21,7 @@ clean:
 install: emutui
 	mkdir -p $(MAKE_HOME)/.config/emutui/menu
 	cp ./config/menu/main.entry $(MAKE_HOME)/.config/emutui/menu/
-	cp ./config/scan.types $(MAKE_HOME)/.config/emutui/
+	if [ ! -f $(MAKE_HOME)/.config/emutui/scan.types ]; then cp ./config/scan.types $(MAKE_HOME)/.config/emutui/; fi
 	chown -R $(MAKE_USER):$(MAKE_GROUP) $(MAKE_HOME)/.config/emutui
 	cp -f emutui $(PREFIX)/bin/
 	chmod 755 $(PREFIX)/bin/emutui
