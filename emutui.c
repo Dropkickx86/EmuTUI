@@ -150,7 +150,7 @@ int main() {
 
     //Setup for menu logic
     pid_t pid;
-    bool edit_flag = FALSE, kill_flag = FALSE;
+    bool edit_flag = FALSE, kill_flag = FALSE, fork_flag = FALSE;
     char emuinfo[3][256];
     int js = open("/dev/input/js0", O_RDONLY | O_NONBLOCK);
     if (js == -1) {
@@ -387,6 +387,7 @@ int main() {
                 endwin();
                 //Clear buffer top avoid duplicated logs
                 fflush(NULL);
+                fork_flag = TRUE;
                 pid = fork();
                 //If current process is child process
                 if (pid == 0) {
@@ -477,7 +478,7 @@ int main() {
         delwin(menu.windows[i].win);
     }
     free(menu.windows);
-    if (pid > 0) {
+    if (fork_flag && pid > 0) {
         //Wait for emulator to exit
         sleep(1);
         char emu[strlen(emuinfo[1]) + 7];
