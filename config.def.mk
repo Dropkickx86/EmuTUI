@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -std=c99 -pedantic -Wall -Wextra -D_POSIX_C_SOURCE=200809L
+CFLAGS = -std=c99 -pedantic -Wall -Wextra -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700
 LDFLAGS = -lncurses
 
 PREFIX = /usr

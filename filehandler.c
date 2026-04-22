@@ -194,7 +194,7 @@ void filelist_get(char *dir, LIST *result, bool subdir) {
         }
 
         //If regular file, increase num_entries, size_content and copy path into array. Allocate more memory for ** if needed
-        if (buffer.st_mode & __S_IFREG) {
+        if (buffer.st_mode & S_IFREG) {
             result->num_entries++;
             if (result->num_entries % 10 == 1) {
                 char **temp = (char**) realloc(result->content, (result->num_entries + 9) * sizeof(*result->content));
@@ -214,7 +214,7 @@ void filelist_get(char *dir, LIST *result, bool subdir) {
             result->content[i++] = strdup(path);
         }
         //If directory, recursively call function
-        else if (subdir && (buffer.st_mode & __S_IFDIR)) {
+        else if (subdir && (buffer.st_mode & S_IFDIR)) {
             strcat(path, "/");
             filelist_get(path, result, true);
             if (!result->content) {
