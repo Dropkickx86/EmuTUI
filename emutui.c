@@ -353,6 +353,10 @@ int main() {
             //If in edit mode
             else if (edit_flag) {
                 log_write(0, "Info: Editing %s", menu.windows[menu.focus_system].content.content[menu.focus_entry]);
+                if (strlen(menu.windows[menu.focus_system].content.content[menu.focus_entry]) > 50 || strlen(menu.windows[menu.focus_system].action[menu.focus_entry]) > 50) {
+                    log_write(0, "Error: too many characters, entry not edited");
+                    break;
+                }
                 int edit_retval = entry_edit(&menu);
                 if (edit_retval == -2) {
                     log_write(-2, "Error: Failed to edit %s, emulator %s removed from listing due to this failure", menu.windows[menu.focus_system].content.content[menu.focus_entry], menu.windows[menu.focus_system].content.content[1]);
