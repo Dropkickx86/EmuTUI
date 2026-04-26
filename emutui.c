@@ -410,12 +410,20 @@ int main() {
                     if (menu.focus_entry != 1 && strcmp(emuinfo[0], emuinfo[2]) != 0) {
                         log_write(0, "Info: Launching %s on %s", gamename, emuinfo[1]);
                         log_close();
-                        execl(emuinfo[0], emuinfo[1], emuinfo[2], NULL);
+                        #ifdef TTY
+                            execl(wm_path, emuinfo[1], emuinfo[0], emuinfo[2], NULL);
+                        #else
+                            execl(emuinfo[0], emuinfo[1], emuinfo[2], NULL);
+                        #endif
                     }
                     else {
                         log_write(0, "Info: Launching %s", emuinfo[1]);
                         log_close();
-                        execl(emuinfo[0], emuinfo[1], NULL);
+                        #ifdef TTY
+                            execl(wm_path, emuinfo[1], emuinfo[0], NULL);
+                        #else
+                            execl(emuinfo[0], emuinfo[1], NULL);
+                        #endif
                     }
                     perror("Fatal: could not start emulator");
                     return 1;

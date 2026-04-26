@@ -11,6 +11,10 @@
 #define X360_BTN_Y 3
 #define X360_BTN_START 7
 
+#ifdef TTY
+    static char *wm_path = "/usr/bin/cage";
+#endif
+
 static char *logfile = "$HOME/.config/emutui/emutui.log";
 static char *menudir = "$HOME/.config/emutui/menu/";
 static char *lastgamefile = "$HOME/.config/emutui/lastgame.info";
