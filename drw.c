@@ -116,7 +116,7 @@ void menu_scroll(const MENU *menu, bool highliht) {
             wattr_on(menu->windows[menu->focus_system].win, COLOR_PAIR(1), NULL);
         }
         if (entry == 0 && menu->focus_system != 0) {
-            mvwaddstr(menu->windows[menu->focus_system].win, position++, ((menu->windows[menu->focus_system].w / 2) - 2), " Scan ");
+            mvwaddstr(menu->windows[menu->focus_system].win, position++, ((menu->windows[menu->focus_system].w / 2) - 3), " Scan ");
         }
         else {
             mvwaddch(menu->windows[menu->focus_system].win, position, ((menu->windows[menu->focus_system].w / 2) - (strlen(menu->windows[menu->focus_system].content.content[entry]) / 2) - 1), ' ');
