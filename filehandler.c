@@ -438,7 +438,7 @@ int gamelist_parse(LIST *filelist, WIN *window, char *typefile) {
 
     int num_entries = filelist->num_entries;
     int resindex = 0;
-    char tmpname[filelist->num_entries][64], tmppath[filelist->num_entries][192];
+    char tmpname[filelist->num_entries][256], tmppath[filelist->num_entries][256];
     for (int j = 0; j < filelist->num_entries; j++){
         strcpy(tmpname[j], "");
     }
