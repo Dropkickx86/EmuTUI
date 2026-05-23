@@ -225,6 +225,10 @@ void filelist_get(char *dir, LIST *result, bool subdir) {
         }
     }
     closedir(local_DIR);
+    if (result->num_entries == 0) {
+        free(result->content);
+        result->content = NULL;
+    }
     return;
 }
 
