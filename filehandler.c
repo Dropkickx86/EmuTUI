@@ -144,6 +144,7 @@ void filelist_get(char *dir, LIST *result, bool subdir) {
             return;
         }
     }
+
     //Input validation
     if (dir[0] != '/' || strlen(dir) < 2) {
         log_write(22, "Error: Invalid path");
@@ -155,6 +156,13 @@ void filelist_get(char *dir, LIST *result, bool subdir) {
         result->num_entries = 0;
         result->size_content = 0;
         return;
+    }
+    char temp[strlen(dir) + 2];
+    if (dir[strlen(dir) - 1] != '/') {
+        strcpy(temp, dir);
+        temp[strlen(dir)] = '/';
+        temp[strlen(dir) + 1] = '\0';
+        dir = &(*temp);
     }
 
     DIR *local_DIR;
@@ -421,6 +429,12 @@ int gamelist_parse(LIST *filelist, WIN *window, char *typefile) {
         log_write(22, "Error: Invalid filepath");
         return 22;
     }
+    char gamedir[strlen(*window->gamedir) + 2];
+    strcpy(gamedir, *window->gamedir);
+    if (gamedir[strlen(gamedir) - 1] != '/') {
+        gamedir[strlen(gamedir)] = '/';
+        gamedir[strlen(gamedir) + 1] = '\0';
+    }
 
     int num_entries = filelist->num_entries;
     int resindex = 0;
@@ -459,7 +473,7 @@ int gamelist_parse(LIST *filelist, WIN *window, char *typefile) {
         }
         
         //Copy name and path into temp variables, copy name from window if preexisting
-        strcpy(tmppath[resindex], filelist->content[i] + strlen(*window->gamedir));
+        strcpy(tmppath[resindex], filelist->content[i] + strlen(gamedir));
         for (int j = 2; j < window->content.num_entries; j++) {
             if (strcmp(window->action[j], tmppath[resindex]) == 0) {
                 strcpy(tmpname[resindex], window->content.content[j]);
@@ -478,7 +492,7 @@ int gamelist_parse(LIST *filelist, WIN *window, char *typefile) {
 
     //Save gamedir and emu info, clear window entries
     char tmpgamedir[256], tmpemuname[256], tmpemupath[256];
-    strcpy(tmpgamedir, window->content.content[0]);
+    strcpy(tmpgamedir, gamedir);
     strcpy(tmpemuname, window->content.content[1]);
     strcpy(tmpemupath, window->action[1]);
     free(*window->content.content);
