@@ -437,8 +437,13 @@ int gamelist_parse(LIST *filelist, WIN *window, char *typefile) {
     }
 
     int num_entries = filelist->num_entries;
+    for (int i = 2; i < window->content.num_entries; i++) {
+        if (window->action[i][0] == '/') {
+            num_entries++;
+        }
+    }
     int resindex = 0;
-    char tmpname[filelist->num_entries][256], tmppath[filelist->num_entries][256];
+    char tmpname[num_entries][256], tmppath[num_entries][256];
     for (int j = 0; j < filelist->num_entries; j++){
         strcpy(tmpname[j], "");
     }
@@ -489,6 +494,15 @@ int gamelist_parse(LIST *filelist, WIN *window, char *typefile) {
     free(*types.content);
     free(types.content);
     types.content = NULL;
+
+    //Copy games with absolute path into tmpvars
+    for (int i = 2; i < window->content.num_entries; i++) {
+        if (window->action[i][0] == '/') {
+            strcpy(tmpname[resindex], window->content.content[i]);
+            strcpy(tmppath[resindex], window->action[i]);
+            resindex++;
+        }
+    }
 
     //Save gamedir and emu info, clear window entries
     char tmpgamedir[256], tmpemuname[256], tmpemupath[256];
