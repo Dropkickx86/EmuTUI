@@ -383,7 +383,12 @@ int main() {
                 //Copy relevant info to array for easy access and streamline with other functions
                 strcpy(emuinfo[0], menu.windows[menu.focus_system].action[1]);
                 strcpy(emuinfo[1], menu.windows[menu.focus_system].content.content[1]);
-                snprintf(emuinfo[2], sizeof(emuinfo[2]), "%s%s", *menu.windows[menu.focus_system].gamedir, menu.windows[menu.focus_system].action[menu.focus_entry]);
+                if (menu.windows[menu.focus_system].action[menu.focus_entry][0] == '/') {
+                    strcpy(emuinfo[2], menu.windows[menu.focus_system].action[menu.focus_entry]);
+                }
+                else {
+                    snprintf(emuinfo[2], sizeof(emuinfo[2]), "%s%s", *menu.windows[menu.focus_system].gamedir, menu.windows[menu.focus_system].action[menu.focus_entry]);
+                }
                 
                 //Code to launch emulator and stop EmuTUI
                 emu_start:
