@@ -128,7 +128,9 @@ void menu_scroll(const MENU *menu, bool highliht) {
         }
         entry++;
     }
-    if (menu->focus_system != 0) {
+
+    //Add the "Add game" button to the bottom of the list
+    if (menu->focus_system != 0 && entry <= menu->windows[menu->focus_system].h) {
         if (entry == menu->focus_entry && highliht) {
             wattr_on(menu->windows[menu->focus_system].win, COLOR_PAIR(1), NULL);
         }
@@ -180,12 +182,6 @@ WINDOW** edit_window_create(const MENU *menu) {
 //Function for editing an entry
 //Returns 0 on success
 int entry_edit(MENU *menu) {
-    //Input validation
-    if (!menu->windows[menu->focus_system].content.content[menu->focus_entry]) {
-        log_write(22, "Error: Content does not exist");
-        return 22;
-    }
-
     //Create and show the edit window
     WINDOW **edit_window = edit_window_create(menu);
     if (!edit_window) {
@@ -202,7 +198,11 @@ int entry_edit(MENU *menu) {
     //Save current name and path in temp array
     int focus = 0, focus_content[2], focus_button = 0, key_pressed, retval = 0;
     char content_new[2][51];
-    if (menu->focus_entry == 0) {
+    if (menu->focus_entry == (menu->windows[menu->focus_system].content.num_entries)) {
+        strcpy(content_new[0], "");
+        strcpy(content_new[1], "");
+    }
+    else if (menu->focus_entry == 0) {
         strcpy(content_new[0], "Scan");
         strcpy(content_new[1], menu->windows[menu->focus_system].content.content[menu->focus_entry]);
     }
@@ -335,6 +335,7 @@ int entry_edit(MENU *menu) {
                         goto edit_save;
                     }
                     else if (focus_button == 1) {
+
                         goto edit_end;
                     }
                 }
@@ -361,12 +362,15 @@ int entry_edit(MENU *menu) {
 
     //Save edited entry to menu struct
     edit_save:
+    if (menu->focus_entry == (menu->windows[menu->focus_system].content.num_entries)) {
+        menu->windows[menu->focus_system].content.num_entries++;
+    }
     if (menu->focus_entry == 0) {
-        menu->windows[menu->focus_system].content.content[menu->focus_entry] = strdup(content_new[1]);
+        menu->windows[menu->focus_system].content.content[menu->focus_entry] = content_new[1];
     }
     else {
-        menu->windows[menu->focus_system].content.content[menu->focus_entry] = strdup(content_new[0]);
-        menu->windows[menu->focus_system].action[menu->focus_entry] = strdup(content_new[1]);
+        menu->windows[menu->focus_system].content.content[menu->focus_entry] = content_new[0];
+        menu->windows[menu->focus_system].action[menu->focus_entry] = content_new[1];
     }
     if (deffile_update(&menu->windows[menu->focus_system]) != 0) {
         free(menu->windows[menu->focus_system].action);
