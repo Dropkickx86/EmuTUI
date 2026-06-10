@@ -128,6 +128,15 @@ void menu_scroll(const MENU *menu, bool highliht) {
         }
         entry++;
     }
+    if (menu->focus_system != 0) {
+        if (entry == menu->focus_entry && highliht) {
+            wattr_on(menu->windows[menu->focus_system].win, COLOR_PAIR(1), NULL);
+        }
+        mvwaddstr(menu->windows[menu->focus_system].win, position, ((menu->windows[menu->focus_system].w / 2) - 5), " Add game ");
+        if (entry == menu->focus_entry && highliht) {
+            wattr_off(menu->windows[menu->focus_system].win, COLOR_PAIR(1), NULL);
+        }
+    }
 
     //Update window
     wrefresh(menu->windows[menu->focus_system].win);

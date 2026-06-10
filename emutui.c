@@ -236,7 +236,11 @@ int main() {
         case KEY_DOWN:
         case X360_BTN_DOWN:
             //Shift focus one menu entry down, redraw window
-            if (menu.focus_entry < (menu.windows[menu.focus_system].content.num_entries - 1)) {
+            if (menu.focus_system == 0 && menu.focus_entry < (menu.windows[menu.focus_system].content.num_entries - 1)) {
+                menu.focus_entry++;
+                menu_scroll(&menu, true);
+            }
+            else if (menu.focus_system != 0 && menu.focus_entry < (menu.windows[menu.focus_system].content.num_entries)) {
                 menu.focus_entry++;
                 menu_scroll(&menu, true);
             }
@@ -352,6 +356,9 @@ int main() {
             }
             //If in edit mode
             else if (edit_flag) {
+                if (menu.focus_entry == (menu.windows[menu.focus_system].content.num_entries)) {
+                    goto add_game;
+                }
                 log_write(0, "Info: Editing %s", menu.windows[menu.focus_system].content.content[menu.focus_entry]);
                 if (strlen(menu.windows[menu.focus_system].content.content[menu.focus_entry]) > 50 || strlen(menu.windows[menu.focus_system].action[menu.focus_entry]) > 50) {
                     log_write(0, "Error: too many characters, entry not edited");
@@ -377,6 +384,11 @@ int main() {
                 log_write(0, "Info: %s scanned for games", *menu.windows[menu.focus_system].gamedir);
                 menu_scroll(&menu, true);
                 menu_shift(&menu);
+            }
+            //If Add game
+            else if (menu.focus_entry == (menu.windows[menu.focus_system].content.num_entries)) {
+                add_game:
+                
             }
             //If emulator or game
             else {
