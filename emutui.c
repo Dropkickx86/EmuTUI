@@ -209,7 +209,7 @@ int main() {
         case KEY_RIGHT:
         case X360_BTN_RIGHT:
             //Shift focus to the window to the right, redraw screen
-            if (menu.focus_system < (menu.num_win - 1)) {
+            if (menu.focus_system < (menu.num_win)) {
                 if (menu.focus_system == 0) {
                     menu.focus_entry = 0;
                 }
@@ -389,8 +389,12 @@ int main() {
                 menu_shift(&menu);
             }
             //If Add game
-            else if (menu.focus_entry == (menu.windows[menu.focus_system].content.num_entries)) {
+            else if (menu.focus_entry == menu.windows[menu.focus_system].content.num_entries) {
                 goto edit;
+            }
+            //If Add emulator
+            else if (menu.focus_system == menu.num_win) {
+
             }
             //If emulator or game
             else {

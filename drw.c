@@ -49,33 +49,54 @@ WIN win_create(int height, int starty, int startx, char *filepath) {
 
 //Function to move right and left in the menu
 void menu_shift(const MENU *menu) {
-    //Input validation
-    if (!menu->windows[menu->focus_system].win) {
-        log_write(22, "Error: Window does not exist");
-        return;
-    }
-
     //Clear screen to avoid artefacts
     clear();
     refresh();
     
     //Draw currently focused window in the middle
-    mvwin(menu->windows[menu->focus_system].win, 0, (menu->scrmaxx / 2) - (menu->windows[menu->focus_system].w / 2));
-    wnoutrefresh(menu->windows[menu->focus_system].win);
-
-    //Draw the windows on the right side of the screen
-    int offset = ((menu->scrmaxx / 2) - (menu->windows[menu->focus_system].w / 2) + menu->windows[menu->focus_system].w);
-    for (int i = menu->focus_system + 1; i < menu->num_win; i++) {
-        if ((offset + menu->windows[i].w) > (menu->scrmaxx + 1)) {
-            break;
-        }
-        mvwin(menu->windows[i].win, 0, offset);
-        offset += menu->windows[i].w;
-        wnoutrefresh(menu->windows[i].win);
+    if (menu->focus_system < menu->num_win) {
+        mvwin(menu->windows[menu->focus_system].win, 0, (menu->scrmaxx / 2) - (menu->windows[menu->focus_system].w / 2));
+        wnoutrefresh(menu->windows[menu->focus_system].win);
+    }
+    else {
+        wattr_on(stdscr, COLOR_PAIR(1), NULL);
+        mvaddstr(menu->windows[menu->focus_system - 1].h /2, (menu->scrmaxx / 2) - 7, " Add emulator ");
+        wattr_off(stdscr, COLOR_PAIR(1), NULL);
+        wnoutrefresh(stdscr);
     }
 
+    //Draw the windows on the right side of the screen
+    int offset;
+    if (menu->focus_system < menu->num_win) {
+        offset = ((menu->scrmaxx / 2) - (menu->windows[menu->focus_system].w / 2) + menu->windows[menu->focus_system].w);
+        bool last_flag = FALSE;
+        for (int i = menu->focus_system + 1; i <= menu->num_win; i++) {
+            if (i == menu->num_win) {
+                last_flag = TRUE;
+                break;
+            }
+            if ((offset + menu->windows[i].w) > (menu->scrmaxx + 1)) {
+                break;
+            }
+            mvwin(menu->windows[i].win, 0, offset);
+            offset += menu->windows[i].w;
+            wnoutrefresh(menu->windows[i].win);
+        }
+
+        //Draw add emulator button
+        if (last_flag && offset + 13 < menu->scrmaxx) {
+            mvaddstr(menu->windows[menu->focus_system].h / 2, offset + 1, "Add emulator");
+            wnoutrefresh(stdscr);
+        }
+    }
+    
     //Draw the windows on the left side of the screen
-    offset = ((menu->scrmaxx / 2) - (menu->windows[menu->focus_system].w / 2));
+    if (menu->focus_system < menu->num_win) {
+        offset = ((menu->scrmaxx / 2) - (menu->windows[menu->focus_system].w / 2));
+    }
+    else {
+        offset = (menu->scrmaxx / 2) - 7;
+    }
     for (int i = menu->focus_system - 1; i >= 0; i--) {
         offset -= menu->windows[i].w;
         if (offset < 0) {
@@ -91,57 +112,53 @@ void menu_shift(const MENU *menu) {
 
 //Function to move up and down in the menu
 void menu_scroll(const MENU *menu, bool highliht) {
-    //Input validation
-    if (!menu->windows[menu->focus_system].win) {
-        log_write(22, "Error: Window does not exist");
-        return;
+    if (menu->focus_system < menu->num_win) {
+        //Clear the window to avoid artefacts
+        wclear(menu->windows[menu->focus_system].win);
+
+        //Set position of the highest entry
+        int position = (menu->windows[menu->focus_system].h / 2) - menu->focus_entry;
+        int entry = 0;
+
+        //If list extends past the top of the window, set which entry will be on top of the window
+        if (position < 0) {
+            position = 0;
+            entry = menu->focus_entry - (menu->windows[menu->focus_system].h / 2);
+        }
+
+        //Draw until all entries are drawn or end of window is reached.
+        while (entry <= menu->windows[menu->focus_system].h && entry < menu->windows[menu->focus_system].content.num_entries) {
+            if (entry == menu->focus_entry && highliht) {
+                wattr_on(menu->windows[menu->focus_system].win, COLOR_PAIR(1), NULL);
+            }
+            if (entry == 0 && menu->focus_system != 0) {
+                mvwaddstr(menu->windows[menu->focus_system].win, position++, ((menu->windows[menu->focus_system].w / 2) - 3), " Scan ");
+            }
+            else {
+                mvwaddch(menu->windows[menu->focus_system].win, position, ((menu->windows[menu->focus_system].w / 2) - (strlen(menu->windows[menu->focus_system].content.content[entry]) / 2) - 1), ' ');
+                mvwaddstr(menu->windows[menu->focus_system].win, position, ((menu->windows[menu->focus_system].w / 2) - (strlen(menu->windows[menu->focus_system].content.content[entry]) / 2)), menu->windows[menu->focus_system].content.content[entry]);
+                mvwaddch(menu->windows[menu->focus_system].win, position++, ((menu->windows[menu->focus_system].w / 2) - (strlen(menu->windows[menu->focus_system].content.content[entry]) / 2) + strlen(menu->windows[menu->focus_system].content.content[entry])), ' ');
+            }
+            if (entry == menu->focus_entry && highliht) {
+                wattr_off(menu->windows[menu->focus_system].win, COLOR_PAIR(1), NULL);
+            }
+            entry++;
+        }
+
+        //Add the "Add game" button to the bottom of the list
+        if (menu->focus_system != 0 && entry <= menu->windows[menu->focus_system].h) {
+            if (entry == menu->focus_entry && highliht) {
+                wattr_on(menu->windows[menu->focus_system].win, COLOR_PAIR(1), NULL);
+            }
+            mvwaddstr(menu->windows[menu->focus_system].win, position, ((menu->windows[menu->focus_system].w / 2) - 5), " Add game ");
+            if (entry == menu->focus_entry && highliht) {
+                wattr_off(menu->windows[menu->focus_system].win, COLOR_PAIR(1), NULL);
+            }
+        }
+
+        //Update window
+        wrefresh(menu->windows[menu->focus_system].win);
     }
-
-    //Clear the window to avoid artefacts
-    wclear(menu->windows[menu->focus_system].win);
-
-    //Set position of the highest entry
-    int position = (menu->windows[menu->focus_system].h / 2) - menu->focus_entry;
-    int entry = 0;
-
-    //If list extends past the top of the window, set which entry will be on top of the window
-    if (position < 0) {
-        position = 0;
-        entry = menu->focus_entry - (menu->windows[menu->focus_system].h / 2);
-    }
-
-    //Draw until all entries are drawn or end of window is reached.
-    while (entry <= menu->windows[menu->focus_system].h && entry < menu->windows[menu->focus_system].content.num_entries) {
-        if (entry == menu->focus_entry && highliht) {
-            wattr_on(menu->windows[menu->focus_system].win, COLOR_PAIR(1), NULL);
-        }
-        if (entry == 0 && menu->focus_system != 0) {
-            mvwaddstr(menu->windows[menu->focus_system].win, position++, ((menu->windows[menu->focus_system].w / 2) - 3), " Scan ");
-        }
-        else {
-            mvwaddch(menu->windows[menu->focus_system].win, position, ((menu->windows[menu->focus_system].w / 2) - (strlen(menu->windows[menu->focus_system].content.content[entry]) / 2) - 1), ' ');
-            mvwaddstr(menu->windows[menu->focus_system].win, position, ((menu->windows[menu->focus_system].w / 2) - (strlen(menu->windows[menu->focus_system].content.content[entry]) / 2)), menu->windows[menu->focus_system].content.content[entry]);
-            mvwaddch(menu->windows[menu->focus_system].win, position++, ((menu->windows[menu->focus_system].w / 2) - (strlen(menu->windows[menu->focus_system].content.content[entry]) / 2) + strlen(menu->windows[menu->focus_system].content.content[entry])), ' ');
-        }
-        if (entry == menu->focus_entry && highliht) {
-            wattr_off(menu->windows[menu->focus_system].win, COLOR_PAIR(1), NULL);
-        }
-        entry++;
-    }
-
-    //Add the "Add game" button to the bottom of the list
-    if (menu->focus_system != 0 && entry <= menu->windows[menu->focus_system].h) {
-        if (entry == menu->focus_entry && highliht) {
-            wattr_on(menu->windows[menu->focus_system].win, COLOR_PAIR(1), NULL);
-        }
-        mvwaddstr(menu->windows[menu->focus_system].win, position, ((menu->windows[menu->focus_system].w / 2) - 5), " Add game ");
-        if (entry == menu->focus_entry && highliht) {
-            wattr_off(menu->windows[menu->focus_system].win, COLOR_PAIR(1), NULL);
-        }
-    }
-
-    //Update window
-    wrefresh(menu->windows[menu->focus_system].win);
 }
 
 //Function to draw a window for editing entries
