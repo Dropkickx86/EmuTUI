@@ -150,7 +150,7 @@ int main() {
 
     //Setup for menu logic
     pid_t pid;
-    bool edit_flag = FALSE, kill_flag = FALSE, fork_flag = FALSE;
+    bool edit_flag = FALSE, kill_flag = FALSE, fork_flag = FALSE, newemu_flag = FALSE;
     char emuinfo[3][256];
     int js = open("/dev/input/js0", O_RDONLY | O_NONBLOCK);
     if (js == -1) {
@@ -375,6 +375,10 @@ int main() {
                     log_write(-1, "Error: Failed to edit %s, no action taken", menu.windows[menu.focus_system].content.content[menu.focus_entry]);
                 }
                 log_write(0, "Info: Edit done");
+                if (newemu_flag) {
+                    menu.focus_entry = 1;
+                    newemu_flag = FALSE;
+                }
                 menu_scroll(&menu, true);
                 menu_shift(&menu);
             }
@@ -394,7 +398,46 @@ int main() {
             }
             //If Add emulator
             else if (menu.focus_system == menu.num_win) {
-
+                log_write(0, "Info: Adding new emulator");
+                WIN *temp = realloc(menu.windows, (menu.num_win + 1) * sizeof(*menu.windows));
+                if (temp) {
+                    menu.windows = temp;
+                    menu.focus_entry = 1;
+                    menu.focus_system = menu.num_win;
+                    menu.windows[menu.num_win].w = 0;
+                    menu.windows[menu.num_win].h = menu.scrmaxy;
+                    menu.windows[menu.num_win].deffile = strdup(menudir);
+                    menu.windows[menu.num_win].content.num_entries = 2;
+                    menu.windows[menu.num_win].content.size_content = 0;
+                    menu.windows[menu.num_win].content.content = malloc(2 * sizeof(menu.windows[menu.num_win].content.content));
+                    if (!menu.windows[menu.num_win].content.content) {
+                        log_write(errno, "Error: Could not allocate memory");
+                    }
+                    *menu.windows[menu.num_win].content.content = malloc(15);
+                    if (!*menu.windows[menu.num_win].content.content) {
+                        log_write(errno, "Error: Could not allocate memory");
+                    }
+                    menu.windows[menu.num_win].content.content[1] = &(**menu.windows[menu.num_win].content.content) + 5;
+                    strcpy(menu.windows[menu.num_win].content.content[0], "");
+                    strcpy(menu.windows[menu.num_win].content.content[1], "");
+                    menu.windows[menu.num_win].action = malloc(2 * sizeof(menu.windows[menu.num_win].action));
+                    if (!menu.windows[menu.num_win].action) {
+                        log_write(errno, "Error: Could not allocate memory");
+                    }
+                    menu.windows[menu.num_win].action[1] = &(**menu.windows[menu.num_win].content.content) + 10;
+                    strcpy(menu.windows[menu.num_win].action[1], "");
+                    menu.windows[menu.num_win].gamedir = &menu.windows[menu.num_win].content.content[0];
+                    menu.windows[menu.num_win].win = newwin(1, 0, 0, 0);
+                    menu.num_win++;
+                    if (entry_edit(&menu) == 0) {
+                        newemu_flag = TRUE;
+                        menu.focus_entry = 0;
+                        goto edit;
+                    }
+                }
+                else {
+                    log_write(errno, "Error: Could not allocate memory");
+                }
             }
             //If emulator or game
             else {

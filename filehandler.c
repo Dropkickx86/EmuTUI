@@ -343,8 +343,8 @@ void win_content_get(WIN *window) {
         }
     }
     window->w += 2;
-    if (window->w < 6) {
-        window->w = 6;
+    if (window->w < 10) {
+        window->w = 10;
     }
     else if (getmaxx(stdscr) < window->w) {
         window->w = getmaxx(stdscr);
@@ -379,7 +379,7 @@ int deffile_update(WIN *window) {
         return temp;
     }
 
-    newfile.content[0] = window->content.content[0];
+    newfile.content[0] = *window->gamedir;
     for (int i = 1; i < newfile.num_entries; i++){
         char tmpres[256];
         snprintf(tmpres, sizeof(tmpres), "%s|%s", window->content.content[i], window->action[i]);

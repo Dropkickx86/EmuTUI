@@ -6,6 +6,7 @@
 #include "filehandler.h"
 #include "log.h"
 #include "types.h"
+#include <unistd.h>
 
 //Function to create and populate a window struct
 //Returns WIN.content.content == NULL on fail
@@ -188,7 +189,7 @@ WINDOW** edit_window_create(const MENU *menu) {
     //Add static values
     box(local_win_array[4], 0, 0);
     mvwaddstr(local_win_array[4], 1, 2, "Name:");
-    mvwaddstr(local_win_array[4], 3, 2, "File:");
+    mvwaddstr(local_win_array[4], 3, 2, "Path:");
     mvwaddstr(local_win_array[2], 0, 0, "<OK>");
     mvwaddstr(local_win_array[3], 0, 0, "<CANCEL>");
     
@@ -383,11 +384,21 @@ int entry_edit(MENU *menu) {
         menu->windows[menu->focus_system].content.num_entries++;
     }
     if (menu->focus_entry == 0) {
-        menu->windows[menu->focus_system].content.content[menu->focus_entry] = content_new[1];
+        *menu->windows[menu->focus_system].gamedir = strdup(content_new[1]);
     }
     else {
         menu->windows[menu->focus_system].content.content[menu->focus_entry] = content_new[0];
         menu->windows[menu->focus_system].action[menu->focus_entry] = content_new[1];
+    }
+    if (menu->windows[menu->focus_system].deffile[strlen(menu->windows[menu->focus_system].deffile) - 1] == '/') {
+        char deffile[256];
+        snprintf(deffile, sizeof(deffile), "%s%s%s", menu->windows[menu->focus_system].deffile, menu->windows[menu->focus_system].content.content[1], ".entry");
+        for (int i = 2; access(deffile, F_OK) == 0; i++) {
+            char temp[256];
+            strncpy(temp, deffile, strlen(deffile) - 6);
+            snprintf(deffile, sizeof(deffile), "%s%d%s", temp, i, ".entry");
+        }
+        menu->windows[menu->focus_system].deffile = strdup(deffile);
     }
     if (deffile_update(&menu->windows[menu->focus_system]) != 0) {
         free(menu->windows[menu->focus_system].action);
