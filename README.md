@@ -1,5 +1,5 @@
 <h1>EmuTUI</h1>
-This is a simple TUI-based launcher for emulators. No emulator or game is included, this is only a launcher for emulators acuired elsewhere.
+This is a simple TUI-based launcher for emulators. No emulator or game is included, this is only a launcher for emulators acquired elsewhere.
 
 The project should compile and run on all glibc-based POSIX-compliant distros. Compilation and running on musl has been successfully tested, but is not guaranteed to work for all versions. The only dependency past libc is NCurses.
 
@@ -20,7 +20,7 @@ Crash Tag Team Racing|CTTR.iso
 Donald Duck Goin' Quackers|Donald Duck Goin' Quackers.iso
 Flatout 2|/usr/local/games/flatout2.iso
 ```
-At this point there is no way to add emulators directly from the TUI, and games can only be added from the TUI through the scan function.
+Emulators and games can also be added directly in the TUI, and games in the game directory can be added automatically with the scan function.
 
 Filetypes for games found with the scan function are defined in the scan.types file (default $HOME/.config/emutui/scan.types). If an emulator uses a file format that is not recognized it only needs to be added to the file. Please also open an issue where the emulator and filetype is defined and it can be added to the next commit.
 
