@@ -391,9 +391,9 @@ int entry_edit(MENU *menu) {
         menu->windows[menu->focus_system].action[menu->focus_entry] = content_new[1];
     }
     if (menu->windows[menu->focus_system].deffile[strlen(menu->windows[menu->focus_system].deffile) - 1] == '/') {
-        char deffile[256];
+        char deffile[272];
         snprintf(deffile, sizeof(deffile), "%s%s%s", menu->windows[menu->focus_system].deffile, menu->windows[menu->focus_system].content.content[1], ".entry");
-        for (int i = 2; access(deffile, F_OK) == 0; i++) {
+        for (int i = 2; access(deffile, F_OK) == 0 || i > 100; i++) {
             char temp[256];
             strncpy(temp, deffile, strlen(deffile) - 6);
             snprintf(deffile, sizeof(deffile), "%s%d%s", temp, i, ".entry");
